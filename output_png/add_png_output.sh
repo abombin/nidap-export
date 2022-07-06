@@ -3,7 +3,7 @@ echo $curentdate > Modify_log.txt
 
 for FILE in *.R 
 do
-  if [[ $FILE == *"template"* ]]; 
+  if [[ $FILE == *"template_function_"* ]]; 
   then
     if grep -q "png(" $FILE;
     then
