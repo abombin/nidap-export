@@ -10,6 +10,7 @@ echo $curentdate > Modify_log.txt
 # Loop through R scripts in curernt directory
 for FILE in *.R 
 do
+
   
   # The parsed scripts always have "template_function_" in filename
   if [[ $FILE == *"template_function_"* ]]; 
