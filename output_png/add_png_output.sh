@@ -19,8 +19,7 @@ do
     # The png output code used in CM pipeline is png(), hence without the "png(", the core does not have png output arguement
     if grep -q "png(" $FILE;
     then
-    
-      # echo ""
+      echo ""
     else
       
       # First record the name of modified file
