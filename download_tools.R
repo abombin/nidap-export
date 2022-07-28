@@ -1,7 +1,7 @@
 # Dev Note
 # The download_tools.R was developed by Robin, and refactored by Rui
 # Current directory is 
-# /rstudio-files/ccbr-data/projects/r3-christine-minnar-cleaned/nidap-export
+# /rstudio-files/ccbr-data/git-repos/nidap-export
 # This is the refactored version, original file can be found in 
 # /rstudio-files/ccbr-data/RSK/nidap_transfer_scripts2/
 
