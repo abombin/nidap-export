@@ -8,11 +8,7 @@ echo "###############################################################"
 echo "###############################################################"
 echo "###############################################################"
 echo "Start copntainer unit_test_docker from image unit_test"
-docker run -d -e $key --name unit_test_docker -ti -v $(pwd):/tmp unit_test bash
-
-# Remove file using docker, somehow docker does not give permission back
-# docker exec -ti unit_test_docker /bin/bash -c 'cd ~/../tmp/test; rm -r ./Unit_test_pipeline'
-# docker exec -ti unit_test_docker /bin/bash -c 'cd ~/../tmp/test; rm -r ./nidap_downloads'
+docker run -d --name unit_test_docker --publish-all -ti -v $(pwd):/tmp unit_test bash
 
 echo "Check current running container"
 docker container ls
@@ -39,9 +35,11 @@ docker exec -ti unit_test_docker /bin/bash -c 'cd ~/../tmp/test/Unit_test_pipeli
 
 
 
-echo "###############################################################"
-echo "Run get_data.R in the unit_test_docker containder"
-docker exec -ti unit_test_docker /bin/bash -c 'cd ~/../tmp/test; Rscript ./Unit_test_pipeline/get_data.R'
+# echo "###############################################################"
+echo "Run get_data.R top acquire data"
+cd ./test
+Rscript ./Unit_test_pipeline/get_data.R
+# docker exec -ti unit_test_docker /bin/bash -c 'cd ~/../tmp/test; Rscript ./Unit_test_pipeline/get_data.R'
 
 echo "###############################################################"
 echo "Run pipeline in the unit_test_docker containder"
@@ -49,13 +47,9 @@ docker exec -ti unit_test_docker /bin/bash -c 'cd ~/../tmp/test/Unit_test_pipeli
 
 
 echo "###############################################################"
-#echo "Stop current unit_test_docker container"
-#docker container stop unit_test_docker
+docker container stop unit_test_docker
+docker rm unit_test_docker
 
 echo "Check current running container"
 docker container ls
-
-# echo "Remove current unit_test_docker container"
-# docker rm unit_test_docker
-
 
