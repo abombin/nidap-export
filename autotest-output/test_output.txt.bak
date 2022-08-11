@@ -1,0 +1,29 @@
+Tests started on:
+Wed Aug 10 10:59:21 EDT 2022
+-----------------------------------------------------
+Test result for:
+/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_compare_outputs
+-----------------------------------------------------
+Error comparison result for: 
+/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_compare_outputs
+-----------------------------------------------------
+Test result for:
+/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_download_tool
+Files ../correct-output.txt and output.txt differ
+-----------------------------------------------------
+Error comparison result for: 
+/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_download_tool
+-----------------------------------------------------
+Test result for:
+/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_parsed_R_scripts
+-----------------------------------------------------
+Error comparison result for: 
+/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_parsed_R_scripts
+-----------------------------------------------------
+Test result for:
+/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_topological_sorting
+-----------------------------------------------------
+Error comparison result for: 
+/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_topological_sorting
+Tests completed on:
+Wed Aug 10 10:59:21 EDT 2022

@@ -1,0 +1,9 @@
+set -e
+Rscript template_function_Process_1.R
+Rscript template_function_Process_1_1.R
+Rscript template_function_Process_1_2.R
+Rscript template_function_Process_2.R
+Rscript template_function_Process_3.R
+Rscript template_function_Process_3_1.R
+Rscript template_function_Process_4.R
+source("workbook_start_globals.R")

@@ -1,0 +1,8 @@
+To use the renv.lock file.
+
+1) Create a new project, be sure to set the project type to 3.5.1 (when giving the project a name.)
+2) Copy the renv.lock file into the project directory.
+3) Set the RENV_PATHS_CACHE environment variable in the .Renviron file or similar.
+RENV_PATHS_CACHE=/rstudio-files/ccbr-data/renv_cache/nidap
+
+
