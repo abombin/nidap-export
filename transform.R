@@ -106,6 +106,11 @@ transform_pipeline <- function(pipe_R,
       state = "function"
       var2 = str_extract(Exported_R_script[lin], "^.+?(?= |<)")
       this_function_out <- paste0("var_", var2)
+      
+      var_input <-  str_extract(Exported_R_script[lin], '[(]\\S+[)]')
+      var_input <- gsub("[()]", "", var_input)
+      var_input <- paste0("var_", var_input, ".rds")
+      
       outhash[lastout] = this_function_out
       vars1 <- unname(c(outhash, newhash)[names(this_function_in)])
       myfun <- list(n=var2, out=this_function_out, 
@@ -124,6 +129,34 @@ transform_pipeline <- function(pipe_R,
       line_out_number <- line_out_number + 1
       
       # 8/10/22 RH: Update by adding gsub(), The replacement apprears to be a part of a line rather than stand alone line
+    }else if(grepl('h5_files <- fs\\$',Exported_R_script[lin])){
+      formated_list[line_out_number] = paste0('# auto removed: ', Exported_R_script[lin])
+      line_out_number <- line_out_number + 1
+      
+      # 9/16/2022 RH: for h5 file handling
+    }else if(grepl('localFilePaths <- ',Exported_R_script[lin])){
+      formated_list[line_out_number] = paste0('localFilePaths <- readRDS("', "./rds_output/", var_input, '")')
+      line_out_number <- line_out_number + 1
+      
+      # 9/16/2022 RH: for h5 file handling
+    }else if(grepl('path <- fs', Exported_R_script[lin])){
+      formated_list[line_out_number] = paste0('path <- "', "./rds_output/", var_input, '"')
+      line_out_number <- line_out_number + 1
+      
+      # 9/16/2022 RH: for h5 file handling
+    }else if(grepl("return\\(NULL\\)", Exported_R_script[lin])){
+      formated_list[line_out_number] = paste0('# auto removed: ', Exported_R_script[lin])
+      line_out_number <- line_out_number + 1
+      
+      # 9/16/2022 RH: for h5 file handling
+    }else if(grepl("saveRDS\\(", Exported_R_script[lin])){
+      var_current_output <-  str_extract(Exported_R_script[lin], '[(]\\S+[,]')
+      var_current_output <- gsub("[(,]", "", var_current_output)
+      
+      formated_list[line_out_number] = paste0('return(', var_current_output, ")")
+      line_out_number <- line_out_number + 1
+      
+      # 9/16/2022 RH: for h5 file handling
     }else if(grepl("orthology_table %>% SparkR::withColumnRenamed", Exported_R_script[lin])){
       formated_list[line_out_number] = gsub("orthology_table %>% SparkR::withColumnRenamed" ,
                                  'orthology_table %>% dplyr::rename("orthology_reference" = orthology_reference_column) %>%', 
@@ -227,6 +260,8 @@ transform_pipeline <- function(pipe_R,
   run_pipeline_script <- file(paste0(pipeline_dir, "/run_pipeline.sh"),"w")
   writeLines("set -e", con = run_pipeline_script)
   
+  run_pipeline_script_R <- file(paste0(pipeline_dir, "/run_pipeline_R.R"),"w")
+  
   # Loop through the processed code list to generate separate R script
   while(numfuncs > 0 && progress){
     numfuncsstart <- numfuncs
@@ -246,8 +281,20 @@ transform_pipeline <- function(pipe_R,
         new_R_script <- file(paste0(pipeline_dir, "/", func$filename), "w")
         writeLines(func$codebody, con = new_R_script)
         function_script_body <- c(paste0("print(\"", func$filename, " #########################################################################\")"))
+        
         writeLines(paste0("Rscript ", func$filename), 
                    con = run_pipeline_script)
+        
+        writeLines(paste0('source("', func$filename, '")'), 
+                   con = run_pipeline_script_R)
+        
+        
+        paste0("template_function_", fun$n, ".R")
+        writeLines(paste0('rm(', 
+                    gsub("\\.R$", "",
+                    gsub("template_function_", "", func$filename)), 
+                    ')'), con = run_pipeline_script_R)
+        
         function_script_body <- c(function_script_body, 
                                   "library(plotly);library(ggplot2);library(jsonlite);")
         
@@ -258,8 +305,23 @@ transform_pipeline <- function(pipe_R,
               "rds_output <- paste0(currentdir,'/rds_output')")
           function_script_body <- c(function_script_body, 
               paste0(inrds,"<-readRDS(paste0(rds_output,\"", "/", inrds, ".rds\"))"))
+          
+          
+          #update 9/19/22 RH: this method does not work for Seurat, adding testing handle
+          function_script_body <- c(function_script_body,
+              "Input_is_Seurat_count <- 0")
+
+          function_script_body <- c(function_script_body,
+              paste0("for(item in ", inrds,
+                     '){ if (class(item)=="Seurat"){Input_is_Seurat_count = Input_is_Seurat_count + 1}}'))
+          
           function_script_body <- c(function_script_body, 
-              paste0(inrds,"<-as.data.frame(", inrds, ")"))
+              'if(Input_is_Seurat_count == 0 ){',
+              paste0(inrds,"<-as.data.frame(", inrds, ")}else{",
+                     inrds, " <- ", inrds, "}"))
+          
+          # function_script_body <- c(function_script_body, 
+          #     paste0(inrds,"<-as.data.frame(", inrds, ")"))
         }
         
         function_script_body <- c(function_script_body, 
@@ -323,13 +385,14 @@ transform_pipeline <- function(pipe_R,
 # Constructing get_date.R script
   print("write transport scripts")
   get_data_script <- file(paste0(pipeline_dir, "/get_data.R"), "w")
-  writeLines(paste0("source(\"", package_prfix, 
+  writeLines(paste0('source(\".', package_prfix, 
       "download_tools.R\")"), con = get_data_script)
   writeLines("key<-Sys.getenv(\"key\")", 
        con = get_data_script)
 
   # Write rds output into a folder
-  rds_output <- paste(pipeline_dir, "/rds_output", sep = "")
+  #rds_output <- paste(pipeline_dir, "/rds_output", sep = "")
+  rds_output <- paste("./rds_output", sep = "")
   writeLines(paste0("rds_output<-\"", rds_output, "\""), con = get_data_script)
   writeLines("if (file.exists(rds_output)!=1) {", con = get_data_script)
   writeLines("dir.create(rds_output,showWarnings = FALSE)}", con = get_data_script)
@@ -361,7 +424,9 @@ transform_pipeline <- function(pipe_R,
   close(get_data_script)
   writeLines('source("workbook_start_globals.R")', 
      con = run_pipeline_script)
+  
   close(run_pipeline_script)
+  close(run_pipeline_script_R)
 
 # Construct verification file
   print("Writing verification file -------------------------------------------------")
@@ -407,4 +472,6 @@ transform_pipeline <- function(pipe_R,
     writeLines("###################################", con = verify_data_script)
     }
   close(verify_data_script)
+  
+
 }

@@ -69,6 +69,14 @@ figure_out_nidap_files <- function(transfers){
   }else if(sum(grepl(".rds$", input_file))){
     print("R rds object, todo readRds")
     
+  }else if(sum(grepl(".h5$", input_file))){
+    print("R4 h5 method")
+    output_list <- c()
+    for(item in input_file){
+      output_list <- c(output_list,item)
+    }
+    return(output_list)
+    
   }else{
     fraw <- data.frame(input_file, stringsAsFactors = FALSE)
     colnames(fraw) <- "value"
@@ -184,4 +192,43 @@ pullnidap_dataset <- function(key, rid, branch){
   }
   
   return(df_total)
+}
+
+pullnidap_raw_R4 <- function(key, rid, branch){
+  dirdown <- "nidap_downloads"
+  dir.create(dirdown, showWarnings = FALSE)
+  
+  # NIDAP address 
+  url = "https://nidap.nih.gov/"
+  dataproxy = "foundry-data-proxy/api/dataproxy/datasets/"
+  catalog = "foundry-catalog/api/catalog/datasets/"
+  callurl <- paste0(url, catalog, rid, 
+                    '/views2/', branch, '/files?pageSize=100')
+  rm <- GET(url = callurl, 
+            add_headers(Authorization = paste("Bearer", key, sep = " ")), 
+            verify = FALSE, content_type_json())
+  con <- content(rm, "parsed")
+  cont <- content(rm, "text")
+  files = c()
+  filenum = 0
+  
+  # Loop through parsed content
+  for(content_line in con$values){
+    filenum = filenum + 1
+    file_url = paste0(url, dataproxy, rid, "/transactions/",
+                      content_line$transactionRid, "/", 
+                      content_line$logicalPath)
+    paths <- strsplit(content_line$logicalPath, "/")[[1]]
+    file_folder_directory = paths[length(paths)]
+    filename <- paste0(dirdown, "/", file_folder_directory)
+    
+    # Acquired from transaction
+    rm3 <- GET(url = file_url, 
+               add_headers(Authorization = paste("Bearer", key, sep = " ")), 
+               verify = FALSE, write_disk(filename, overwrite = TRUE))
+    info = file.info(filename)
+    print(filename)
+    files = c(files, filename)
+  }
+  return(files)
 }
