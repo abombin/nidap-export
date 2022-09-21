@@ -1,0 +1,4 @@
+# This file is to compare topological sorting from transform.R
+This test compares parsed topological sorting in run_pipeline.sh from current run and the baseline result.
+The ouput from runme will be the difference between current topological sorting and the baseline, and report difference if exists.
+If no difference, the output should be "Two tolological sort files are the same."

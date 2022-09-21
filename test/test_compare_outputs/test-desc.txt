@@ -1,0 +1,4 @@
+# Unit test for outputs
+This test compares the output rds from current run in docker and the baseline result.
+The ouput from runme will be the difference between the md5 hash of output rds and the baseline, and report difference if exists.
+If no difference, the output should be "Two ouput files are the same."

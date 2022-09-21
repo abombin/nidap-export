@@ -1,0 +1,4 @@
+#Unit test for parsed R scripts.
+This test compares parsed R scripts from current run and the baseline result.
+The ouput from runme will be the difference between parsed R scripts and the baseline, and report difference if exists.
+If no difference, the output should be "Two ouput files are the same."
