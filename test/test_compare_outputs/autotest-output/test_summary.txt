@@ -1,5 +1,0 @@
-Test count: 1; test failures: 1; error output mismatches: 1
-Test failures: 
-/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_compare_outputs
-Error comparison failures: 
-/rstudio-files/ccbr-data/git-repos/nidap-export/test/test_compare_outputs

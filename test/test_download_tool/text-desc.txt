@@ -1,4 +1,0 @@
-# Unit test for download_tools.
-This test compares the downloaded file from current run get_data.R and the baseline result.
-The ouput from runme will be the difference between the md5 hash of downloaded rds and the baseline, and report difference if exists.
-If no difference, the output should be "Two R-script files are the same."
