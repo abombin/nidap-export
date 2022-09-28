@@ -88,16 +88,6 @@ RUN apt-get update
 
 RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
 
-#RUN wget \
-#    https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.2-Linux-x86_64.sh \
-#    && mkdir /root/.conda \
-#    && bash Miniconda3-py37_4.8.2-Linux-x86_64.sh  -b \
-#    && rm -f Miniconda3-py37_4.8.2-Linux-x86_64.sh
-#RUN wget \
-#    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-#    && mkdir /root/.conda \
-#    && bash Miniconda3-latest-Linux-x86_64.sh  -b \
-#    && rm -f Miniconda3-latest-Linux-x86_64.sh
 RUN wget \
     https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.2-Linux-x86_64.sh \
     && mkdir /root/.conda \
@@ -105,18 +95,7 @@ RUN wget \
     && rm -f Miniconda3-py37_4.8.2-Linux-x86_64.sh
 
 RUN conda --version
-#artifacts-external-conda-anaconda:
-#priority: 1
-#artifacts-internal-conda-thirdparty:
-#priority: 2
-#artifacts-external-conda-bioconda:
-#priority: 3
-#artifacts-external-conda-forge:
-#priority: 4
-#artifacts-external-conda-bu-cnio:
-#priority: 5
 
-#RUN conda config --remove channels defaults
 RUN conda config --append channels defaults
 RUN conda config --append channels anaconda
 RUN conda config --append channels bioconda
@@ -124,36 +103,17 @@ RUN conda config --append channels conda-forge
 RUN conda config --append channels bu_cnio
 RUN conda config --append channels esgf
 
-#RUN conda install -c conda-forge python=3.6.9=h9d8adfe_0_cpython
 RUN conda install -c conda-forge mamba
-#RUN conda install -c conda-forge libffi=3.2.1=hf484d3e_1007 libcurl=7.79.1=h2574ce0_1
-#RUN conda install tbb=2021.5.0=h4bd325d_0 umap-learn-0.4.6-py36h9f0ad1d_0
-#RUN conda install -c esgf krb5=1.19.2=hcc1bbae_2
-#RUN conda install scikit-learn=0.24.2=py36hc89565f_1 scikit-image-0.17.2-py36h284efc9_4 umap-learn-0.4.6-py36h9f0ad1d_0
 
+RUN conda init bash
 
+### For .yml method
+COPY environment.yml .
+RUN mamba env update -f environment.yml
 
-#RUN mamba install /tmp/r-rcpp-1.0.6-r35hbad8821_0.tar.bz2
-#RUN mamba install /tmp/r-rlang-0.4.10-r35hbad8821_3.tar.bz2
-#RUN mamba install  r-rcppprogress=0.4.2 
-
-
-YML_FILE_NAME=environment.yml
-TXT_FILE_NAME=conda_pkg2.txt
-
-
-if test -f "YML_FILE_NAME"
-then
-  echo "Building Environment using $YML_FILE_NAME"
-  COPY environment.yml .
-  
-  RUN conda init bash
-  
-  RUN mamba env update -f environment.yml
-else
-  echo "Building Environment using $TXT_FILE_NAME"
-  RUN PKGS=`cat TXT_FILE_NAME |grep -P -v "r-rcpp|^vector-|^r-foundr|spark|snappy|foundry|umap-learn"| tr " " "="  | tr "\n" " "` 
-fi
+### For .txt method
+#COPY conda_pkg.txt .
+#RUN PKGS=`cat conda_pkg.txt |grep -P -v -i "r-l2p|^r-vector|^r-foundr|spark|snappy|python-file-paths|foundry|networkx|decorator|umap-learn" | tr " " "="  | tr "\n" " "`; mamba install $PKGS
 
 
 RUN echo "source activate single-cell-test-Rbase" > ~/.bashrc
