@@ -73,7 +73,7 @@ upload_project <- function(upload_file_name, datasetname, folder_path_on_NIDAP, 
   brid <- con$datasetRid
   file_url = paste0(url, dataproxy, brid, 
                     "/transactions/", trid, 
-                    "/putFile?logicalPath = ", 
+                    "/putFile?logicalPath=", 
                     upload_file_name)
   resp2 = POST(url = file_url, 
                add_headers(Authorization = paste("Bearer", key, sep = " ")), 
