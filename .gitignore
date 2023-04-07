@@ -2,3 +2,4 @@ dice/
 autotest-output/
 output_png/
 NIDAP_RSW_env_mirror/
+__pycache__/

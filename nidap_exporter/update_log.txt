@@ -1,0 +1,5 @@
+Version_0_1: 8/1/2022, Done.  
+	Refactored Robin's code, unit test using the Chritine Minnard codebook.
+
+Version_0_2: 8/12/2022, Done.  
+	Update the Unit-test to be self contained and use training codebook as testing material, remove unused "gc_option" in transform.R.  The master branch currently on version_0_2_1 with update to the transform.R, which removed the ""gc-option" input arguement. User who want to use transform_pipeline.R prior to 8/12/2022 should pull version_0_1 instead.

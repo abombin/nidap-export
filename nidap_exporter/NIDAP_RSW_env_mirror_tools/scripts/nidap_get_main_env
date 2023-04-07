@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+source ~/.nidaprc
+source $NIDAP_SCRIPTS/get_nidap_conda_environments.sh
+get_nidap_main_env $@

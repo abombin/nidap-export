@@ -1,0 +1,15 @@
+{
+    "seurat": "Seurat",
+    "complexheatmap": "ComplexHeatmap",
+    "genomeinfodbdata": "GenomeInfoDbData",
+    "mast": "MAST",
+    "rcolorbrewer": "RColorBrewer",
+    "gridbase": "grid", 
+    "gridextra": "grid", 
+    "singler": "SingleR",
+    "biocmanager": "BiocManager",
+    "geomxtools": "GeomxTools",
+    "rtsne": "Rtsne",
+    "nanostringnctools": "NanoStringNCTools"
+}
+

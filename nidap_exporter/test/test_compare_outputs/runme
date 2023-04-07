@@ -1,0 +1,20 @@
+# Runme for output compares
+
+target_ouput_location='../Unit_test_pipeline/rds_output'
+target_file='./target_output_hash.txt'
+echo "# md5 hash for target datasets" > target_output_hash.txt
+for FILE in ${target_ouput_location}/*
+do
+  current_md5=($(md5sum $FILE))
+  echo $current_md5 >> target_output_hash.txt
+done
+
+baseline_file='./baseline_output.txt'
+difference=$(diff $baseline_file $target_file)
+dif_length=($(echo ${#difference}))
+if [[ $dif_length -eq 0 ]];
+then
+  echo "Two ouput files are the same."
+else
+  echo $difference
+fi
