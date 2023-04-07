@@ -7,11 +7,11 @@ from lib.sbg_tools import SBGApi
 
 def help():
         return """
-create_cwl_pipeline.py: Creates a CWL pipeline based on the output of a project from
+sbg_importer.py: Creates a CWL pipeline based on the output of a project from
 the NIDAP export.
 
 USAGE:
-    python create_cwl_pipeline.py <nidap_export_project> <cwl_output_directory>
+    python sbg_importer.py <nidap_export_project> <cwl_output_directory>
            [<docker_registry_address>] [-f] [-h]
 
 Required Positional Arguments:
