@@ -35,9 +35,9 @@ def init_cwl_file(fname = 'cwl_pipeline.cwl', version = '1.2', workflow_id="<you
     print(f" - Creating CWL pipe: {fname}")
     f = open(fname, 'w')
     f.write(f"class: Workflow\n")
-    #f.write(f"cwlVersion: v{version}\n")
+    f.write(f"cwlVersion: v{version}\n")
     #f.write(f"id: {workflow_id}\n")
-    f.write(f"label: {label}\n")
+    #f.write(f"label: {label}\n")
     f.write(f"$namespaces:\n")
     f.write(f"  sbg: 'https://sevenbridges.com'\n")
     return f
@@ -97,9 +97,11 @@ def cwl_add_rscript_step(f,name,requirement,input,repo):
     f.write(f"        source:\n")
     #f.write(f"          - input_data\n")
     if requirement is not None:
-        for r in requirement:
+        if "input_data" in requirement:
+            f.write(f"          - input_data\n")
+        for r in (requirement):
             if r == "input_data":
-                f.write(f"          - input_data\n")
+                continue
             else:
                 f.write(f"          - {r[4:]}/output\n")
 

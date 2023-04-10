@@ -170,7 +170,7 @@ def main():
     # Create the CWL code pipeline
     create_pipeline(target,output,sbg,repo)
     print(f"Output folder: {output}")
-
+    return
     # Create Docker Image and upload to SBG
     if docker == "":
         create_docker(target,sbg.user,output,proj_name)
