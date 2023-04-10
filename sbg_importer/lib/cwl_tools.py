@@ -30,14 +30,14 @@ def get_sequence(fname = 'run_pipeline.sh',path="pipeline/src",to_remove="pipeli
     requires.extend([outputs[i-1] for i in range(1,n_steps+1)])
     return fnames, names, requires, n_steps
 
-def init_cwl_file(fname = 'cwl_pipeline.cwl', version = '1.2', workflow_id="degenhardthf/test-real/test-workflow/0", label="Test workflow"):
+def init_cwl_file(fname = 'cwl_pipeline.cwl', version = '1.2', workflow_id="<your-user>/<your-project>/<your-workflow>/0", label="workflow"):
     # Returns the cwl pipeline file address with its header initialized
     print(f" - Creating CWL pipe: {fname}")
     f = open(fname, 'w')
     f.write(f"class: Workflow\n")
-    f.write(f"cwlVersion: v{version}\n")
+    #f.write(f"cwlVersion: v{version}\n")
     #f.write(f"id: {workflow_id}\n")
-    #f.write(f"label: {label}\n")
+    f.write(f"label: {label}\n")
     f.write(f"$namespaces:\n")
     f.write(f"  sbg: 'https://sevenbridges.com'\n")
     return f
@@ -68,20 +68,15 @@ def cwl_add_input_directory(f,name,path):
     f.write( "    type: Directory\n")
     f.write( "    loadListing: deep_listing\n")
 
-def cwl_add_output_level(f):
+def cwl_add_output_level(f,name):
     # Includes the output level in the cwl pipeline file
     print(f" - Add output level to CWL pipe")
-    f.write("outputs: []\n" )
-    return
     f.write("outputs:\n" )
-    f.write("  - id: output:\n" )
-    f.write("    type: File?\n" )
-    f.write("    outputBinding:\n" )
-    f.write("      glob:\n" )
-    f.write("        - '*.rds'\n" )
-    f.write("        - '*.pdf'\n" )
-    f.write("        - '*.png'\n" )
-    f.write("        - '*.jpg'\n" )
+    for n in name:
+        f.write(f"  - id: {n}_output\n")
+        f.write(f"    outputSource:\n")
+        f.write(f"      - {n}/output\n")
+        f.write(f"    type: 'File[]?'\n")
 
 def cwl_add_step_level(f):
     # Includes the step level in the cwl pipeline file

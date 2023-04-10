@@ -16,10 +16,10 @@ def create_docker_file():
     for l in original_lines:
         if l.startswith("CMD "):
             modified_lines.append(
-                "RUN mkdir /scripts/\n"
+                "RUN mkdir /src/\n"
             )
             modified_lines.append(
-                f"COPY scripts/* /scripts/\n"
+                f"COPY src/* /src/\n"
             )
         modified_lines.append(l)
     docker_modified.writelines(modified_lines)
@@ -37,7 +37,7 @@ def create_docker(folder,user,output,proj_name):
     # Go to Docker location
     os.chdir(docker_dir)
     
-    os.system(f"cp -r {current_dir}/{output}/scripts .")
+    os.system(f"cp -r {current_dir}/{output}/src .")
     create_docker_file()
     
     print(f"Building docker image for project: {name}")

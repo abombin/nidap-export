@@ -111,15 +111,16 @@ def create_pipeline(target="../Unit_test_pipeline", output="pipeline", sbg=None,
     create_rscript_cwl_call(f"{output}/cwl/rscript_tool.cwl", repo)
 
     # Initialize main cwl pipeline
-    cwl = init_cwl_file(f"{output}/cwl/workflow.cwl")
+    workflow_id = f"{sbg.user}/{output}/workflow/0"
+    cwl = init_cwl_file(f"{output}/cwl/workflow.cwl","1.2",workflow_id,"workflow")
     cwl_add_input_level(cwl)
-    cwl_add_output_level(cwl)
 
     # Include steps
     cwl_add_step_level(cwl)
     for s in range(n_steps):
         cwl_add_rscript_step(cwl,names[s],graph[s],fnames[s],repo)
     cwl_add_requirements(cwl,repo)
+    cwl_add_output_level(cwl,names)
 
     # Process completed
     cwl.close()
