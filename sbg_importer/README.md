@@ -13,7 +13,7 @@ The first step to be able to run the package is to create a creadentials file wi
 
 ![Authentication](.imgs/token.png)
 
-In the next windows one just needs press the button to create the token. For the next step, open the [credentials file](examples/credentials) example and modify it pasting your credential in the credentials field. Note: The field was already filled for you as an example, you should past your credential in the place of the example:
+In the next windows one just needs press the button to create the token. For the next step, open the [credentials file](examples/credentials) example and modify it pasting your credential in the credentials field. Note: The field was already filled for you as an example, you should past your credential in the place of the example token:
 
 ![Credentials](.imgs/credentials.png)
 
@@ -29,7 +29,7 @@ And copy you credentials file to this folder:
 cp <path>/credentials ~/.sevenbridges/
 ```
 
-And you are all set!
+And you are all set! This is mandatory since the API will need your credentials to create a project on your account and copy the files of your project there.
 
 ## 3 - Running the application
 The mandatory step to run the application is having your project exported from NIDAP by using the [NIDAP Exporter](https://github.com/fnlcr-bids-sdsi/nidap-export/tree/main/nidap_exporter) package. Once you have the exported folder, just call:
