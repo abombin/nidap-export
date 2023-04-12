@@ -13,7 +13,11 @@ The first step to be able to run the package is to create a creadentials file wi
 
 ![Authentication](.imgs/token.png)
 
-In the next windows one just needs press the buttom to create the token. For the next step, open the [credentials file](examples/credentials) example and modify it pasting your credential where it says '\<your-token\>' (remove the \<\> symbols as well). Then just create a directory for holding your credentials:
+In the next windows one just needs press the buttom to create the token. For the next step, open the [credentials file](examples/credentials) example and modify it pasting your credential in the credentials field. Note: The field was already filled for you as an example, you should past your credential in the place of the example:
+
+![Credentials](.imgs/credentials.png)
+
+Then just create a directory for holding your credentials:
 
 ```bash
 mkdir ~/.sevenbridges/
@@ -64,20 +68,28 @@ Select the "App" task and click on the grey buttom on the top right corner calle
 
 ![App](.imgs/app.png)
 
-A windows will appear asking for you to give a name to this workflow, just name it and press in the green buttom:
+A windows will appear asking for you to give a name to this workflow, just name it and press in the "Create" green button:
 
 ![CreateApp](.imgs/create_app.png)
 
 Which will lead you to the workflow editor:
 
-![CreateApp](.imgs/create_app.png)
+![CreateApp](.imgs/workflow.png)
 
 Just press on the tab that says "code", which will open a file editor. Copy the content of the "workflow.cwl" file that was created under a folder called "cwl" inside your project folder into this editor:
 
 ![SaveApp](.imgs/save_workflow.png)
 
-And press in the "Save and Run" buttom! This will lead you to the Task runner, where now you can choose the initial datasets that are needed to run your workflow. If you do not remember which they are, just check the step 3 of running this application, the name of the files should be prompted in your terminal.
+To check how the topological graph looks like just select the "Visual Editor" tab on the top:
+
+![Authentication](.imgs/workflow_pipe.png)
+
+To run the application now you just need to press the "Save and Run" button (the triangle in the right top corner), and you will be redirected to the Task runner.
 
 ![SaveApp](.imgs/run.png)
 
-Then just press to select the files and find them within the data folder and we are good to run the task on SBG!
+Where now you can choose the initial datasets that are needed to run your workflow. If you do not remember which they are, just check the step 3 of running this application, the name of the files should be prompted in your terminal. For selecting the input files just press in the "Select file(s)" button and select all the initial files (not the intermediate) that are needed for starting the pipeline. They should be inside the folder called "data" in the root directory of you project at SBG. With that done, we are good to run the task on SBG by pressing the "Run" blue button on the top right corner of the page!
+
+After running the application, you will have access to all of the outputs generated in each step of the pipeline at the outputs session of the run. The files will also be available at the root directory of your project, so you can check them just selecting the "Files" tab.
+
+![TaskFinished](.imgs/task_done.png)
