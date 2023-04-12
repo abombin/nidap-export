@@ -13,7 +13,7 @@ The first step to be able to run the package is to create a creadentials file wi
 
 ![Authentication](.imgs/token.png)
 
-In the next windows one just needs press the buttom to create the token. For the next step, open the [credentials file](examples/credentials) example and modify it pasting your credential in the credentials field. Note: The field was already filled for you as an example, you should past your credential in the place of the example:
+In the next windows one just needs press the button to create the token. For the next step, open the [credentials file](examples/credentials) example and modify it pasting your credential in the credentials field. Note: The field was already filled for you as an example, you should past your credential in the place of the example:
 
 ![Credentials](.imgs/credentials.png)
 
@@ -64,7 +64,7 @@ The ultimate step is to create the workflow on the project you just created and 
 
 ![Projects](.imgs/projects.png)
 
-Select the "App" task and click on the grey buttom on the top right corner called "Create app" (<b>not</b> the green):
+Select the "App" task and click on the grey button on the top right corner called "Create app" (<b>not</b> the green):
 
 ![App](.imgs/app.png)
 
@@ -72,17 +72,17 @@ A windows will appear asking for you to give a name to this workflow, just name 
 
 ![CreateApp](.imgs/create_app.png)
 
-Which will lead you to the workflow editor:
+Which will lead you to the workflow editor (that will be empty):
 
-![CreateApp](.imgs/workflow.png)
+![Workflow](.imgs/workflow.png)
 
 Just press on the tab that says "code", which will open a file editor. Copy the content of the "workflow.cwl" file that was created under a folder called "cwl" inside your project folder into this editor:
 
 ![SaveApp](.imgs/save_workflow.png)
 
-To check how the topological graph looks like just select the "Visual Editor" tab on the top:
+To check how the topological graph  like just select the "Visual Editor" tab on the top:
 
-![Authentication](.imgs/workflow_pipe.png)
+![WorkflowVisualization](.imgs/workflow_pipe.png)
 
 To run the application now you just need to press the "Save and Run" button (the triangle in the right top corner), and you will be redirected to the Task runner.
 
