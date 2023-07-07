@@ -30,7 +30,6 @@ if [ -z "${github_repo}" ] || [ -z "${rds}" ] || [ -z "${pipeline}" ] || [ -z "$
   exit 1
 fi
 
-
 hour=$(date '+%H')
 day=$(date '+%d')
 month=$(date '+%m')
@@ -41,8 +40,8 @@ echo "$github_repo"
 
 file_dir="$(dirname "$(readlink -f "$0")")"
 
-echo "\nChanging workind directory to one level up.\n"
-cd $file_dir/../
+# echo "\nChanging workind directory to one level up.\n"
+# cd $file_dir/../
 
 echo "\nCloning target GitHub repo\n"
 
@@ -62,13 +61,13 @@ echo "\nCopying the template folder to the GitHub repo\n"
 cp -R $file_dir/github_template/* .
 
 echo "\nCopying the template-R function and run-pipeline.sh into src folder:\n"
-cp $file_dir/../$pipeline/template_*.R ./src
+cp $pipeline/template_*.R ./src
 
 if [ "$rds" = "Yes" ]; then
   echo "rds option is set to Yes, copying rds_output folder to the github repo"
   echo "WARNING: PLEASE REMOVE RDS FILES THAT ARE GENERATED FROM THE PIPELINE RUN"
   echo "WARNING: PLEASE MAKE SURE YOU WANT TO SHARE THE DATA ON GITHUB"
-  cp -R $file_dir/../$pipeline/rds_output ./src
+  cp -R $pipeline/rds_output ./src
 else
   echo "\nRDS is not set to Yes, not including the rds outputs in the github repo\n"
   mkdir ./src/rds_output
@@ -76,7 +75,7 @@ else
 fi
 
 echo "\nCopying the Dockerfile to the GitHub repo:\n"
-cp -R $file_dir/../$docker/* ./Docker_file
+cp -R $docker/* ./Docker_file
 
 
 echo "\nCommitting the changes\n"
