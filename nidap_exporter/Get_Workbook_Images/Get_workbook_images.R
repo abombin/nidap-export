@@ -5,8 +5,6 @@ library("RCurl")
 
 token <- Sys.getenv("key")
 
-token <- "eyJwbG50ciI6ImhudG1pektNUnBpNkllSUx5bFJ6Q2c9PSIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJSengwOFdka1RXeUg2RXBXd3JMMW9BPT0iLCJqdGkiOiJoTU1KNHYzRVRlS3pqQnJSNU1jT2hRPT0iLCJvcmciOiI1dDFBdHZlclJTbW1YRXhSZ2QxaXpnPT0iLCJoZCI6Im5pZGFwLm5paC5nb3YifQ.SxIgB6KlrwSO2ksARay8kimG_EI-khdvczrkj_ys6XzrIDI4c4CRpQq3VHtNl0uNBprkAPYOAtHJOitBqV2Ldg"
-
 workbook_rid <- "ri.vector.main.workbook.380753ec-334c-4282-b6f1-27dd16d3f0fa"
 branch <- "Scott_test"
 image_prefix <- "test_output_"
