@@ -4,4 +4,4 @@ This tool set provides the neccesary tools to generate a GitHub repository conta
 
 Conceptual diagram for the process:
 
-<img src="nidap_exporter/R3_to_Docker/R3_to_Docker_Process_Illustration.png">
+<img src="./nidap_exporter/R3_to_Docker/R3_to_Docker_Process_Illustration.png">
