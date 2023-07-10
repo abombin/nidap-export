@@ -2,7 +2,7 @@ This repo is to hold any scripts associated with NIDAP migration.
 
 To setup this repo:
 
- 1-Add the environment variable "NIDAP_SCRIPTS" in your .bashrc file and point it to the directory of this repo
+ 1-Add the environment variable "NIDAP_SCRIPTS" in your .bashrc file and point it to the directory of this folder
  2-Edit your PATH to:
     export PATH=$PATH:$NIDAP_SCRIPTS/scripts
  3-Create a file ~/.nidaprc and set in it the NIDAP developer token:
