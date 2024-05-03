@@ -51,13 +51,19 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen en_US.utf8 \
     && /usr/sbin/update-locale LANG=en_US.UTF-8
 
-# Install Miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.2-Linux-x86_64.sh \
-    && bash Miniconda3-py37_4.8.2-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-py37_4.8.2-Linux-x86_64.sh
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-py310_22.11.1-1-Linux-x86_64.sh \
+    && mkdir -p /conda/.conda \
+    && bash Miniconda3-py310_22.11.1-1-Linux-x86_64.sh  -b -p /conda/miniconda3 \
+    && rm -f Miniconda3-py310_22.11.1-1-Linux-x86_64.sh
 
 # Add Miniconda Path to System
-ENV PATH="/root/miniconda3/bin:${PATH}"
+ENV PATH=/conda/miniconda3/bin:$PATH
+ENV CONDA_PREFIX=/conda/miniconda3
+ENV CONDA_DEFAULT_ENV=/conda/.conda
+
+RUN conda install -n base conda-libmamba-solver \
+    && conda config --set solver libmamba
 
 # Config Conda and install mamba
 RUN conda config --append channels bioconda \
@@ -69,7 +75,7 @@ RUN conda init bash
 
 # Build Conda Environment from environment.yml
 COPY environment.yml .
-RUN mamba env update -f environment.yml
+RUN conda env update -f environment.yml
 
 # Ask conda to activate the built environment when starting
 ARG built_env_name="$(grep -E '^name:' environment.yml | sed 's/name: *//')"
