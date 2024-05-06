@@ -77,7 +77,11 @@ def create_r_library_file(conda_r_packages):
     r_packages = [ package.split("-")[1] for package in r_packages]
 
     #Remove the 'base' package
-    r_packages.remove("base")
+    try:
+        r_packages.remove("base")
+        print("Removed 'r-base' from r_packages.")
+    except ValueError:
+        print("'r-base' package not found in environment, no action needed.")
 
     #Replace the package name with the library call (e.g. seurat)  for known packages
     script_dir = os.path.dirname(os.path.abspath(__file__)) 
