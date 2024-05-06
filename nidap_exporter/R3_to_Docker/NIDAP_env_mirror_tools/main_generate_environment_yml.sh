@@ -21,5 +21,5 @@ function get_environment_file_input {
   python ../nidap_parse_environments.py $environment_file_name $resolved_environment_file_name $3
   
   cd ..
-  
+  set +x
 }
