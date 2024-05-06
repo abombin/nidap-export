@@ -18,9 +18,15 @@ def create_conda_yml_file(args):
     env = json.load(env_file)
 
     env_name = args.env_name
+    mode = args.mode
 
     all_packages = env['condaEnvironmentDefinition']['packageMatchSpecs']
-    r_packages = [package for package in all_packages if package.startswith("r-") or package.startswith("bioconductor-")]
+    if mode == 'R':
+        r_packages = [pkg for pkg in all_packages if pkg.startswith("r-") or pkg.startswith("bioconductor-")]
+    elif mode == 'Python':
+        r_packages = [pkg for pkg in all_packages if not (pkg.startswith("r-") or pkg.startswith("bioconductor-"))]
+    else:
+        r_packages = all_packages  # Include all packages
 
     resolved_packages = resolved_env['resolvedCondaEnvironment']['packageSpecs']
     resolved_packages_names_versions = [ (package['name'], package['version']) for package in resolved_packages]
@@ -37,9 +43,9 @@ def create_conda_yml_file(args):
             #The package already has a version defined before resolving
             conda_r_packages.append(package)
 
-
-    conda_r_packages.append("r-renv")
-    conda_r_packages.append("r-biocmanager")
+    if mode == "R":
+        conda_r_packages.append("r-renv")
+        conda_r_packages.append("r-biocmanager")
     conda_r_packages.sort()
 
     #Create the conda bash file
@@ -112,9 +118,11 @@ if __name__ == '__main__':
    parser.add_argument("nidap_env_file", help="The exported NIDAP environment file")
    parser.add_argument("nidap_resolved_env_file", help="The exported solved NIDAP environment file")
    parser.add_argument("env_name", help="The name of then conda environment to be created")
+   parser.add_argument("--mode", choices=['R', 'Python', 'All'], default='R', help="Filter packages by type: R, Python, or All")
 
    args = parser.parse_args()
 
    conda_r_packages = create_conda_yml_file(args)
-   create_r_library_file(conda_r_packages)
+   if args.mode == 'R':
+       create_r_library_file(conda_packages)
 

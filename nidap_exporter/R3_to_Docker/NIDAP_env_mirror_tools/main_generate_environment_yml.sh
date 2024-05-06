@@ -3,6 +3,7 @@ source ./get_nidap_conda_environments.sh
 function get_environment_file_input {
   
   environment_name="$3"
+  mode=${4:-R}  # Default to 'R' if no mode is provided
   
   mkdir -p $3
   
@@ -18,7 +19,7 @@ function get_environment_file_input {
   
   cd ./$3
   
-  python ../nidap_parse_environments.py $environment_file_name $resolved_environment_file_name $3
+  python ../nidap_parse_environments.py $environment_file_name $resolved_environment_file_name $3 --mode $mode
   
   cd ..
   set +x
