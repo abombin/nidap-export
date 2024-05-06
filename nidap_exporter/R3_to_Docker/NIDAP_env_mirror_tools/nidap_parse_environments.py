@@ -43,7 +43,7 @@ def create_conda_yml_file(args):
             #The package already has a version defined before resolving
             conda_r_packages.append(package)
 
-    if mode == "R":
+    if mode != "Python":
         conda_r_packages.append("r-renv")
         conda_r_packages.append("r-biocmanager")
     conda_r_packages.sort()
