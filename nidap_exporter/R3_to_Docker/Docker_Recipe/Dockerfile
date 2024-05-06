@@ -12,6 +12,7 @@ RUN chmod -R ugo+rx /root \
 
 # Install System Libary and Packages
 RUN apt-get update \
+    && apt-get install -y --no-install-recommends software-properties-common \
     && add-apt-repository --enable-source --yes "ppa:marutter/rrutter4.0" \
     && add-apt-repository --enable-source --yes "ppa:c2d4u.team/c2d4u4.0+" \
     && apt-get install -y --no-install-recommends \
@@ -38,7 +39,6 @@ RUN apt-get update \
         wget \
         ca-certificates \
         fonts-texgyre \
-        software-properties-common \
         curl \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
