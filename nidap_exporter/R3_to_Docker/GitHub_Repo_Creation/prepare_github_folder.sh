@@ -62,15 +62,18 @@ cp -R $file_dir/github_template/* .
 
 echo "\nCopying the template-R function and run-pipeline.sh into src folder:\n"
 cp $pipeline/template_*.R ./src
+cp $pipeline/run_pipeline.sh ./src
 
 if [ "$rds" = "Yes" ]; then
   echo "rds option is set to Yes, copying rds_output folder to the github repo"
   echo "WARNING: PLEASE REMOVE RDS FILES THAT ARE GENERATED FROM THE PIPELINE RUN"
   echo "WARNING: PLEASE MAKE SURE YOU WANT TO SHARE THE DATA ON GITHUB"
   cp -R $pipeline/rds_output ./src
+  find "$pipeline/nidap_downloads" -type f ! -name "*.parquet" -exec cp --parents \{\} ./src \;
 else
   echo "\nRDS is not set to Yes, not including the rds outputs in the github repo\n"
   mkdir ./src/rds_output
+  mkdir ./src/nidap_downloads
   echo "\nThis file is for maintaining folder structure.\n" > ./src/rds_output/.githold 
 fi
 

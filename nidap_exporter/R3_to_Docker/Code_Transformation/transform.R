@@ -47,6 +47,7 @@ transform_pipeline <- function(pipe_R,
   function_out_number = 1
   lastout = ""
   funname = "_"
+  current_input_var <- NULL
   
   for(lin in 1 : length(Exported_R_script)){
     
@@ -109,6 +110,7 @@ transform_pipeline <- function(pipe_R,
       
       var_input <-  str_extract(Exported_R_script[lin], '[(]\\S+[)]')
       var_input <- gsub("[()]", "", var_input)
+      var_input_name <- var_input
       var_input <- paste0("var_", var_input, ".rds")
       
       outhash[lastout] = this_function_out
@@ -129,21 +131,39 @@ transform_pipeline <- function(pipe_R,
       line_out_number <- line_out_number + 1
       
       # 8/10/22 RH: Update by adding gsub(), The replacement apprears to be a part of a line rather than stand alone line
-    }else if(grepl('h5_files <- fs\\$',Exported_R_script[lin])){
-      formated_list[line_out_number] = paste0('# auto removed: ', Exported_R_script[lin])
-      line_out_number <- line_out_number + 1
-      
-      # 9/16/2022 RH: for h5 file handling
     }else if(grepl('localFilePaths <- ',Exported_R_script[lin])){
       formated_list[line_out_number] = paste0('localFilePaths <- readRDS("', "./rds_output/", var_input, '")')
       line_out_number <- line_out_number + 1
       
       # 9/16/2022 RH: for h5 file handling
-    }else if(grepl('path <- fs', Exported_R_script[lin])){
-      formated_list[line_out_number] = paste0('path <- "', "./rds_output/", var_input, '"')
+    }else if(grepl("\\$fileSystem\\(\\)", Exported_R_script[lin])){
+      
+      current_input_var <- sub("\\$fileSystem\\(\\).*", "", Exported_R_script[lin])
+      current_input_var <- sub(".*<-\\s*", "", current_input_var)
+      current_input_var <- trimws(current_input_var)
+      formated_list[line_out_number] = paste0("# auto removed: ", 
+                                              Exported_R_script[lin])
+      line_out_number <- line_out_number + 1
+      
+    }else if(grepl(' <- fs\\w*\\$', Exported_R_script[lin])){
+      formated_list[line_out_number] = paste0('# auto removed: ', Exported_R_script[lin])
       line_out_number <- line_out_number + 1
       
       # 9/16/2022 RH: for h5 file handling
+    }else if(grepl('<- nidapGetPath', Exported_R_script[lin])){
+      formated_list[line_out_number] = paste0('# auto removed: ', Exported_R_script[lin])
+      current_input_var <- sub("\\nidapGetPath\\(\\).*", "", Exported_R_script[lin])
+      current_input_var <- sub(".*<-\\s*", "", current_input_var)
+      current_input_var <- trimws(current_input_var)
+      
+      line_out_number <- line_out_number + 1
+      
+      # 7/16/2024 RH: for latest get path
+    }else if(grepl('<- readRDS', Exported_R_script[lin])){
+      formated_list[line_out_number] = paste0(sub("<-.*", "<- ", Exported_R_script[lin]), current_input_var)
+      line_out_number <- line_out_number + 1
+      
+      # 7/16/2024 RH: for latest get path
     }else if(grepl("return\\(NULL\\)", Exported_R_script[lin])){
       formated_list[line_out_number] = paste0('# auto removed: ', Exported_R_script[lin])
       line_out_number <- line_out_number + 1
@@ -195,11 +215,6 @@ transform_pipeline <- function(pipe_R,
           Exported_R_script[lin])
       line_out_number <- line_out_number + 1
       
-    }else if(grepl("\\$fileSystem\\(\\)", Exported_R_script[lin])){
-      formated_list[line_out_number] = paste0("# auto removed: ", 
-          Exported_R_script[lin])
-      line_out_number <- line_out_number + 1
-      
     }else if(!grepl("install.packages|FRObjects", Exported_R_script[lin])){
       formated_list[line_out_number] = gsub('RFoundryObject\\(', 'list(value=', 
           Exported_R_script[lin])
@@ -210,13 +225,13 @@ transform_pipeline <- function(pipe_R,
   function_file_list[[function_out_number]] <- formated_list
   print(funname)
   functions[[funname]]$codebody <- formated_list
-  function_file_names <- c("workbook_start_globals.R")
+  function_file_names <- c("")
 
 # Parsing templates
   print("Parsing Templates ======================================================")
   for(function_line in 1:length(functions)){
     fun <- functions[[function_line]]
-    function_file_names[function_line + 1] <- paste0("template_function_", fun$n, ".R")
+    function_file_names[function_line + 1] <- paste0("template_", fun$n, ".R")
     functions[[function_line]]$filename <- function_file_names[function_line + 1]
     ino = str_match(fun$sig, "(?<=\\().*?(?=\\))")
     
@@ -260,7 +275,7 @@ transform_pipeline <- function(pipe_R,
   run_pipeline_script <- file(paste0(pipeline_dir, "/run_pipeline.sh"),"w")
   writeLines("set -e", con = run_pipeline_script)
   
-  run_pipeline_script_R <- file(paste0(pipeline_dir, "/run_pipeline_R.R"),"w")
+  run_pipeline_script_R <- file(paste0(pipeline_dir, "/Console_R_run_pipeline.R"),"w")
   
   # Loop through the processed code list to generate separate R script
   while(numfuncs > 0 && progress){
@@ -284,25 +299,32 @@ transform_pipeline <- function(pipe_R,
         
         writeLines(paste0("Rscript ", func$filename), 
                    con = run_pipeline_script)
+        # Remove the .R extension and append .pdf
+        new_filename <- sub("\\.R$", ".pdf", func$filename)
+        writeLines(paste0("if [ -f Rplots.pdf ]; then mv Rplots.pdf ", new_filename, "; fi"),
+                   con = run_pipeline_script)
         
         writeLines(paste0('source("', func$filename, '")'), 
                    con = run_pipeline_script_R)
+        writeLines(paste0('file.rename("Rplots.pdf","', new_filename,'")'),
+                   con = run_pipeline_script_R)
         
         
-        paste0("template_function_", fun$n, ".R")
+        
+        paste0("template_", fun$n, ".R")
         writeLines(paste0('rm(', 
                     gsub("\\.R$", "",
-                    gsub("template_function_", "", func$filename)), 
+                    gsub("template_", "", func$filename)), 
                     ')'), con = run_pipeline_script_R)
+
         
         function_script_body <- c(function_script_body, 
                                   "library(plotly);library(ggplot2);library(jsonlite);")
-        
+        function_script_body <- c(function_script_body, 
+                                  "currentdir <- getwd()")
+        function_script_body <- c(function_script_body, 
+                                  "rds_output <- paste0(currentdir,'/rds_output')")
         for(inrds in func$vars){
-          function_script_body <- c(function_script_body, 
-              "currentdir <- getwd()")
-          function_script_body <- c(function_script_body, 
-              "rds_output <- paste0(currentdir,'/rds_output')")
           function_script_body <- c(function_script_body, 
               paste0(inrds,"<-readRDS(paste0(rds_output,\"", "/", inrds, ".rds\"))"))
           
@@ -311,17 +333,24 @@ transform_pipeline <- function(pipe_R,
           function_script_body <- c(function_script_body,
               "Input_is_Seurat_count <- 0")
 
-          function_script_body <- c(function_script_body,
-              paste0("for(item in ", inrds,
-                     '){ if (class(item)=="Seurat"){Input_is_Seurat_count = Input_is_Seurat_count + 1}}'))
+          function_script_body <- c(
+            function_script_body,
+            paste0("if (is.list(", inrds, ")) {",
+                   "for(item in ", inrds, ") {",
+                   'if (any(grepl("Seurat", class(item)))) {',
+                   "Input_is_Seurat_count = Input_is_Seurat_count + 1",
+                   "}}}"
+            )
+          )
           
-          function_script_body <- c(function_script_body, 
-              'if(Input_is_Seurat_count == 0 ){',
-              paste0(inrds,"<-as.data.frame(", inrds, ")}else{",
-                     inrds, " <- ", inrds, "}"))
-          
-          # function_script_body <- c(function_script_body, 
-          #     paste0(inrds,"<-as.data.frame(", inrds, ")"))
+        function_script_body <- c(
+          function_script_body, 
+          paste0("if (class(", inrds, ') == "RFilePath" || class(', inrds, ') == "character") {',
+                 inrds, " <- ", inrds, "} else {",
+                 'if(Input_is_Seurat_count == 0 && ! any(grepl("Seurat", class(', inrds, ')))) {',
+                 paste0(inrds, " <- as.data.frame(", inrds, ")} else {",
+                        inrds, " <- ", inrds, "}}"))
+          )
         }
         
         function_script_body <- c(function_script_body, 
