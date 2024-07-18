@@ -417,7 +417,7 @@ transform_pipeline <- function(pipe_R,
 # Constructing get_date.R script
   print("write transport scripts")
   get_data_script <- file(paste0(pipeline_dir, "/get_data.R"), "w")
-  writeLines(paste0('source(\".', package_prfix, 
+  writeLines(paste0('source(\"', package_prfix, 
       "download_tools.R\")"), con = get_data_script)
   writeLines("key<-Sys.getenv(\"key\")", 
        con = get_data_script)

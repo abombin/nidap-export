@@ -67,7 +67,8 @@ figure_out_nidap_files <- function(transfers){
                     check.names = FALSE))
     
   }else if(sum(grepl(".rds$", input_file))){
-    print("R rds object, todo readRds")
+    print("R rds object, readRDS")
+    return(readRDS(input_file))
     
   }else if(sum(grepl(".h5$", input_file))){
     print("R4 h5 method")
