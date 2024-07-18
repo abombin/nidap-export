@@ -152,8 +152,11 @@ transform_pipeline <- function(pipe_R,
       # 9/16/2022 RH: for h5 file handling
     }else if(grepl('<- nidapGetPath', Exported_R_script[lin])){
       formated_list[line_out_number] = paste0('# auto removed: ', Exported_R_script[lin])
-      current_input_var <- sub("\\nidapGetPath\\(\\).*", "", Exported_R_script[lin])
-      current_input_var <- sub(".*<-\\s*", "", current_input_var)
+      # Extract the content within parentheses of nidapGetPath
+      current_input_var <- sub(".*nidapGetPath\\((.*)\\).*", "\\1", Exported_R_script[lin])
+      
+      # Split the arguments by comma
+      current_input_var <- strsplit(current_input_var, ",")[[1]]
       current_input_var <- trimws(current_input_var)
       
       line_out_number <- line_out_number + 1
