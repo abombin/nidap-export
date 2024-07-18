@@ -454,8 +454,8 @@ transform_pipeline <- function(pipe_R,
   }
   
   close(get_data_script)
-  writeLines('source("workbook_start_globals.R")', 
-     con = run_pipeline_script)
+  # writeLines('source("workbook_start_globals.R")', 
+     # con = run_pipeline_script)
   
   close(run_pipeline_script)
   close(run_pipeline_script_R)
