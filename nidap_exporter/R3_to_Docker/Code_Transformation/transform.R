@@ -348,7 +348,7 @@ transform_pipeline <- function(pipe_R,
           
         function_script_body <- c(
           function_script_body, 
-          paste0("if (class(", inrds, ') == "RFilePath" || class(', inrds, ') == "character") {',
+          paste0("if (class(", inrds, ') == "RFilePath" || class(', inrds, ') == "character" || class(', inrds, ') == "list") {',
                  inrds, " <- ", inrds, "} else {",
                  'if(Input_is_Seurat_count == 0 && ! any(grepl("Seurat", class(', inrds, ')))) {',
                  paste0(inrds, " <- as.data.frame(", inrds, ")} else {",
