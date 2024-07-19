@@ -180,6 +180,23 @@ transform_pipeline <- function(pipe_R,
       line_out_number <- line_out_number + 1
       
       # 9/16/2022 RH: for h5 file handling
+    }else if(grepl("\\$upload\\(", Exported_R_script[lin])){
+      formated_list[line_out_number] = paste0('# auto removed: ', Exported_R_script[lin])
+      line_out_number <- line_out_number + 1
+    }else if(grepl("htmlwidgets\\:\\:saveWidget\\(", Exported_R_script[lin])){
+      modified_line <- gsub(
+        "(htmlwidgets\\:\\:saveWidget\\([^,]+,)[^,]+(,.+\\))", 
+        paste0("\\1 \"", funname, "\" \\2"), 
+        Exported_R_script[lin]
+      )
+      formated_list[line_out_number] = modified_line
+      line_out_number <- line_out_number + 1
+    }else if(grepl("stop\\(\\'Input data not properly imported into Workbook\\'\\)", Exported_R_script[lin])){
+      formated_list[line_out_number] = "input.dat <- input[grepl('\\.h5$', input)]; input.tcr <- input[grepl('\\.csv$', input)]; input=c(input.dat,input.tcr)}"
+      line_out_number <- line_out_number + 1
+    }else if(grepl('stop\\(\\"Input should be Seurat object in rds file format', Exported_R_script[lin])){
+      formated_list[line_out_number] =  paste0('# auto removed: ', Exported_R_script[lin])
+      line_out_number <- line_out_number + 1
     }else if(grepl("orthology_table %>% SparkR::withColumnRenamed", Exported_R_script[lin])){
       formated_list[line_out_number] = gsub("orthology_table %>% SparkR::withColumnRenamed" ,
                                  'orthology_table %>% dplyr::rename("orthology_reference" = orthology_reference_column) %>%', 
@@ -320,7 +337,8 @@ transform_pipeline <- function(pipe_R,
         function_script_body <- c(
           "######### Node Execution Steps ##########",
           paste0("print(\"", func$filename, " #########################################################################\")"))
-        
+        writeLines(paste0("echo \"################## ", func$filename, " Starting... ################\""),
+                   con = run_pipeline_script)
         writeLines(paste0("Rscript ", func$filename, " 2>&1 | tee ./Logs/", func$filename, ".log; exit_status=${PIPESTATUS[0]}; if [ $exit_status -ne 0 ]; then exit $exit_status; fi" ), 
                    con = run_pipeline_script)
         # Remove the .R extension and append .pdf
@@ -330,6 +348,8 @@ transform_pipeline <- function(pipe_R,
         writeLines(paste0("find . -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' \\) -exec mv {} Images/ \\;"),
                    con = run_pipeline_script)
         writeLines(paste0("echo \"################## ", func$filename, " Completed! ################\""),
+                   con = run_pipeline_script)
+        writeLines(paste0(""),
                    con = run_pipeline_script)
         
         writeLines(paste0('source("', func$filename, '")'), 
