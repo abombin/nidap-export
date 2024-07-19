@@ -298,7 +298,11 @@ transform_pipeline <- function(pipe_R,
   
         new_R_script <- file(paste0(pipeline_dir, "/", func$filename), "w")
         writeLines(func$codebody, con = new_R_script)
-        function_script_body <- c(paste0("print(\"", func$filename, " #########################################################################\")"))
+        
+        
+        function_script_body <- c(
+          "######### Node Execution Steps ##########",
+          paste0("print(\"", func$filename, " #########################################################################\")"))
         
         writeLines(paste0("Rscript ", func$filename), 
                    con = run_pipeline_script)
@@ -312,56 +316,57 @@ transform_pipeline <- function(pipe_R,
         writeLines(paste0('file.rename("Rplots.pdf","', new_filename,'")'),
                    con = run_pipeline_script_R)
         
-        
-        
         paste0("template_", fun$n, ".R")
         writeLines(paste0('rm(', 
                     gsub("\\.R$", "",
                     gsub("template_", "", func$filename)), 
                     ')'), con = run_pipeline_script_R)
 
-        
+        function_script_body <- c(function_script_body, 
+                                  "# Setup Compute Environment")
         function_script_body <- c(function_script_body, 
                                   "library(plotly);library(ggplot2);library(jsonlite);")
         function_script_body <- c(function_script_body, 
                                   "currentdir <- getwd()")
         function_script_body <- c(function_script_body, 
                                   "rds_output <- paste0(currentdir,'/rds_output')")
-        for(inrds in func$vars){
-          function_script_body <- c(function_script_body, 
-              paste0(inrds,"<-readRDS(paste0(rds_output,\"", "/", inrds, ".rds\"))"))
-          
-          
-          #update 9/19/22 RH: this method does not work for Seurat, adding testing handle
-          function_script_body <- c(function_script_body,
-              "Input_is_Seurat_count <- 0")
+        function_script_body <- c(
+          function_script_body,
+          "############################")
 
+        for(inrds in func$vars){
           function_script_body <- c(
             function_script_body,
-            paste0("if (is.list(", inrds, ")) {",
-                   "for(item in ", inrds, ") {",
-                   'if (any(grepl("Seurat", class(item)))) {',
-                   "Input_is_Seurat_count = Input_is_Seurat_count + 1",
-                   "}}}"
+            "",
+            paste0("# Processing input variable: ", inrds))
+          
+          function_script_body <- c(function_script_body, 
+              paste0(inrds,"<-readRDS(paste0(rds_output,\"", "/", inrds, ".rds\"))"),
+              "")
+          
+          function_script_body <- c(
+            function_script_body, 
+            paste0("if (!('Seurat' %in% class(", inrds, "))) {",
+                   " if (!(class(", inrds, ") %in% c('data.frame', 'RFilePath', 'character', 'list'))) {", inrds, " <- as.data.frame(", inrds, ")}}"
             )
           )
-          
-        function_script_body <- c(
-          function_script_body, 
-          paste0("if (class(", inrds, ') == "RFilePath" || class(', inrds, ') == "character" || class(', inrds, ') == "list") {',
-                 inrds, " <- ", inrds, "} else {",
-                 'if(Input_is_Seurat_count == 0 && ! any(grepl("Seurat", class(', inrds, ')))) {',
-                 paste0(inrds, " <- as.data.frame(", inrds, ")} else {",
-                        inrds, " <- ", inrds, "}}"))
+          function_script_body <- c(
+            function_script_body,
+            "#############################",
+            ""
           )
         }
+        
+        function_script_body <- c(
+          function_script_body,
+          "# Saving Output Dataset"
+        )
         
         function_script_body <- c(function_script_body, 
               paste0("invisible(graphics.off())"))
         function_script_body <- c(function_script_body, 
               func$bind)
-        function_script_body <- c(function_script_body, 
-              paste0("invisible(graphics.off())"))
+
         function_script_body <- c(function_script_body, 
               paste0("saveRDS(", func$out, ", paste0(rds_output,\"", 
                      "/", func$out, ".rds\"))"))
