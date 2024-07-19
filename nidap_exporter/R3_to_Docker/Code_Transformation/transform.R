@@ -276,7 +276,24 @@ transform_pipeline <- function(pipe_R,
   print("Sorting Templates ======================================================")
 
   run_pipeline_script <- file(paste0(pipeline_dir, "/run_pipeline.sh"),"w")
-  writeLines("set -e", con = run_pipeline_script)
+  
+  script_starter_lines <- c(
+    "#!/bin/bash",
+    "",
+    "set -e",
+    "for dir in Logs PDFs Images; do",
+    "  if [ -d \"$dir\" ]; then",
+    "    echo \"Directory $dir already exists, skipping creation.\"",
+    "  else",
+    "     mkdir \"$dir\"",
+    "     chmod -R ug=rwx,o=rx \"$dir\"",
+    "     echo \"Directory $dir created successfully.\"",
+    "  fi",
+    "done",
+    ""
+  )
+  
+  writeLines(script_starter_lines, con = run_pipeline_script)
   
   run_pipeline_script_R <- file(paste0(pipeline_dir, "/Console_R_run_pipeline.R"),"w")
   
@@ -304,11 +321,15 @@ transform_pipeline <- function(pipe_R,
           "######### Node Execution Steps ##########",
           paste0("print(\"", func$filename, " #########################################################################\")"))
         
-        writeLines(paste0("Rscript ", func$filename), 
+        writeLines(paste0("Rscript ", func$filename, " 2>&1 | tee ./Logs/", func$filename, ".log; exit_status=${PIPESTATUS[0]}; if [ $exit_status -ne 0 ]; then exit $exit_status; fi" ), 
                    con = run_pipeline_script)
         # Remove the .R extension and append .pdf
         new_filename <- sub("\\.R$", ".pdf", func$filename)
-        writeLines(paste0("if [ -f Rplots.pdf ]; then mv Rplots.pdf ", new_filename, "; fi"),
+        writeLines(paste0("if [ -f Rplots.pdf ]; then mv Rplots.pdf ./PDFs/", new_filename, "; fi"),
+                   con = run_pipeline_script)
+        writeLines(paste0("find . -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' \\) -exec mv {} Images/ \\;"),
+                   con = run_pipeline_script)
+        writeLines(paste0("echo \"################## ", func$filename, " Completed! ################\""),
                    con = run_pipeline_script)
         
         writeLines(paste0('source("', func$filename, '")'), 
