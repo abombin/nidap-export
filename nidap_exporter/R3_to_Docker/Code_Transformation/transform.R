@@ -192,7 +192,7 @@ transform_pipeline <- function(pipe_R,
       formated_list[line_out_number] = modified_line
       line_out_number <- line_out_number + 1
     }else if(grepl("stop\\(\\'Input data not properly imported into Workbook\\'\\)", Exported_R_script[lin])){
-      formated_list[line_out_number] = "input.dat <- input[grepl('\\.h5$', input)]; input.tcr <- input[grepl('\\.csv$', input)]; input=c(input.dat,input.tcr)}"
+      formated_list[line_out_number] = "input.dat <- input[grepl('\\\\.h5$', input)]; input.tcr <- input[grepl('\\\\.csv$', input)]; input=c(input.dat,input.tcr);"
       line_out_number <- line_out_number + 1
     }else if(grepl('stop\\(\\"Input should be Seurat object in rds file format', Exported_R_script[lin])){
       formated_list[line_out_number] =  paste0('# auto removed: ', Exported_R_script[lin])
@@ -307,18 +307,34 @@ transform_pipeline <- function(pipe_R,
     "     echo \"Directory $dir created successfully.\"",
     "  fi",
     "done",
-    ""
+    "",
+    "run_workbook_template() {",
+    "  local template_name=$1",
+    "  local template_location=$2",
+    "  local template_count=$3",
+    '  echo "############ ${template_location}/${template_count} ${template_name}.R Starting... ########"',
+    "  Rscript ${template_name}.R 2>&1 | tee ./Logs/${template_name}.log; exit_status=${PIPESTATUS[0]}",
+    "  if [ $exit_status -ne 0 ]; then",
+    "    exit $exit_status",
+    "  fi",
+    "  if [ -f Rplots.pdf ]; then",
+    "    mv Rplots.pdf ./PDFs/${template_name}.pdf",
+    "  fi",
+    "  find . -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' \\) -exec mv {} Images/ \\;",
+    '  echo "############ ${template_location}/${template_count} ${template_name}.R Completed! ########"',
+    "}"
   )
   
   writeLines(script_starter_lines, con = run_pipeline_script)
   
   run_pipeline_script_R <- file(paste0(pipeline_dir, "/Console_R_run_pipeline.R"),"w")
+  seq_counter <- 1
   
   # Loop through the processed code list to generate separate R script
   while(numfuncs > 0 && progress){
     numfuncsstart <- numfuncs
-    
-    for(i in 1 : length(functions)){
+    total_count <- length(functions)
+    for(i in 1 : total_count){
       if(uncalcfun[i] == FALSE){
         func <- functions[[i]]
       
@@ -337,23 +353,26 @@ transform_pipeline <- function(pipe_R,
         function_script_body <- c(
           "######### Node Execution Steps ##########",
           paste0("print(\"", func$filename, " #########################################################################\")"))
-        writeLines(paste0("echo \"################## ", func$filename, " Starting... ################\""),
+        writeLines(paste0("############ ", seq_counter, "/", total_count, " ", func$filename, " ########"),
                    con = run_pipeline_script)
-        writeLines(paste0("Rscript ", func$filename, " 2>&1 | tee ./Logs/", func$filename, ".log; exit_status=${PIPESTATUS[0]}; if [ $exit_status -ne 0 ]; then exit $exit_status; fi" ), 
-                   con = run_pipeline_script)
-        # Remove the .R extension and append .pdf
-        new_filename <- sub("\\.R$", ".pdf", func$filename)
-        writeLines(paste0("if [ -f Rplots.pdf ]; then mv Rplots.pdf ./PDFs/", new_filename, "; fi"),
-                   con = run_pipeline_script)
-        writeLines(paste0("find . -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.jpg' \\) -exec mv {} Images/ \\;"),
-                   con = run_pipeline_script)
-        writeLines(paste0("echo \"################## ", func$filename, " Completed! ################\""),
-                   con = run_pipeline_script)
+        writeLines(
+          paste0(
+            'run_workbook_template \"',
+            sub("\\.R$", "", func$filename),
+            '\" \"',
+            seq_counter,
+            '\" \"',
+            total_count,
+            '\"'),
+          con = run_pipeline_script)
         writeLines(paste0(""),
                    con = run_pipeline_script)
         
+        seq_counter <- seq_counter + 1
+        
         writeLines(paste0('source("', func$filename, '")'), 
                    con = run_pipeline_script_R)
+        new_filename <- paste0(sub("\\.R$", "", func$filename, '\"'),"pdf")
         writeLines(paste0('file.rename("Rplots.pdf","', new_filename,'")'),
                    con = run_pipeline_script_R)
         
