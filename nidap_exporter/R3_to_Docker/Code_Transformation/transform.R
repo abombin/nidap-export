@@ -23,7 +23,7 @@ transform_pipeline <- function(pipe_R,
   dir.create(pipeline_dir)
 
 # Read exported NIDAP pipeline, pipe_py for python script, pipe_in for R script
-  Exported_python_script <- readLines(pipe_py)
+  # Exported_python_script <- readLines(pipe_py)
   Exported_R_script <- readLines(pipe_R)
 
 # Create list of functions, each function is a tranform in NIDAP codebook
@@ -501,9 +501,9 @@ transform_pipeline <- function(pipe_R,
         con = get_data_script)
     branch1 = "master"
     
-    if(sum(grepl(new_hash_line, Exported_python_script)) != 0){
-      branch1 = branch
-    }
+    # if(sum(grepl(new_hash_line, Exported_python_script)) != 0){
+    #   branch1 = branch
+    # }
     
     writeLines(paste0("branch=\"", branch1,"\""), 
        con = get_data_script)

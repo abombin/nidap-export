@@ -36,7 +36,25 @@ branch_of_dataset = "master"
 # generally the user does not need to modify this unless required.
 # The repo location is "/rstudio-files/ccbr-data/git-repos/nidap-export"
 # For tutorial, please u
-location_of_NIDAP_transform_scripts = "./nidap-export/"
+location_of_NIDAP_transform_scripts = "./nidap-export/nidap_exporter/R3_to_Docker/Code_Transformation"
+
+# Retrieve command line arguments
+args <- commandArgs(trailingOnly = TRUE)
+
+# Default values
+target_working_directory <- if (length(args) >= 1) args[[1]] else target_working_directory
+exported_NIDAP_codebook <- if (length(args) >= 2) args[[2]] else exported_NIDAP_codebook
+foldername_to_store_pipeline <- if (length(args) >= 3) args[[3]] else foldername_to_store_pipeline
+branch_of_dataset <- if (length(args) >= 4) args[[4]] else branch_of_dataset
+location_of_NIDAP_transform_scripts <- if (length(args) >= 5) args[[5]] else location_of_NIDAP_transform_scripts
+
+# Print for confirmation (optional)
+cat("Target working directory:", target_working_directory, "\n")
+cat("Exported NIDAP codebook path:", exported_NIDAP_codebook, "\n")
+cat("Folder to store pipeline:", foldername_to_store_pipeline, "\n")
+cat("Branch of dataset:", branch_of_dataset, "\n")
+cat("Tool set location:", location_of_NIDAP_transform_scripts, "\n")
+
 
 #############################################################
 #############################################################
@@ -45,7 +63,8 @@ location_of_NIDAP_transform_scripts = "./nidap-export/"
 #############################################################
 
 # location_of_NIDAP_transform_scripts_from_target_folder
-location_of_NIDAP_transform_scripts_from_target_folder <- location_of_NIDAP_transform_scripts
+location_of_NIDAP_transform_scripts_from_target_folder <- paste0(location_of_NIDAP_transform_scripts,
+                                                                 "/")
 
 # Set parameter set for unit test and tutorial
 if (Tutorial_and_unit_test == TRUE) {
@@ -73,7 +92,7 @@ target_folder_directory <- paste0("./",foldername_to_store_pipeline)
 
 # Acquire path to exported pipelines
 exported_R_script_from_NIDAP <- paste0(exported_NIDAP_codebook, "pipeline.R")
-exported_Python_script_from_NIDAP <- paste0(exported_NIDAP_codebook, "pipeline.py")
+# exported_Python_script_from_NIDAP <- paste0(exported_NIDAP_codebook, "pipeline.py")
 
 
 
