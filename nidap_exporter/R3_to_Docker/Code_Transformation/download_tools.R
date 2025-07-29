@@ -94,8 +94,9 @@ pullnidap_raw <- function(key, rid, branch){
   url = "https://nidap.nih.gov/"
   dataproxy = "foundry-data-proxy/api/dataproxy/datasets/"
   catalog = "foundry-catalog/api/catalog/datasets/"
-  callurl <- paste0(url, catalog, rid, 
-                    '/views2/', branch, '/files?pageSize=100')
+  callurl <- URLencode(paste0(url, catalog, rid, 
+                    '/views2/', branch, '/files?pageSize=100'))
+  print(callurl)
   rm <- GET(url = callurl, 
             add_headers(Authorization = paste("Bearer", key, sep = " ")), 
             verify = FALSE, content_type_json())
@@ -107,9 +108,10 @@ pullnidap_raw <- function(key, rid, branch){
   # Loop through parsed content
   for(content_line in con$values){
     filenum = filenum + 1
-    file_url = paste0(url, dataproxy, rid, "/transactions/",
+    file_url = URLencode(paste0(url, dataproxy, rid, "/transactions/",
                       content_line$transactionRid, "/", 
-                      content_line$logicalPath)
+                      content_line$logicalPath))
+    print(file_url)
     paths <- strsplit(content_line$logicalPath, "/")[[1]]
     file_folder_directory = paths[length(paths)]
     filename <- paste0(dirdown, "/", file_folder_directory)
