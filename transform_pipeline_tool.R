@@ -85,7 +85,7 @@ transform_pipeline(exported_R_script_from_NIDAP,
                    branch_of_dataset,
                    exported_Python_script_from_NIDAP)
 
-cmd = paste0("cp nidap-export/run_pipeline.py ", exported_NIDAP_codebook)
+cmd = paste0("cp nidap-export/run_pipeline.py ", foldername_to_store_pipeline, "/")
 system(cmd)
 
 # Set current working directory to the target_folder_directory
