@@ -85,13 +85,13 @@ transform_pipeline(exported_R_script_from_NIDAP,
                    branch_of_dataset,
                    exported_Python_script_from_NIDAP)
 
-# Set current working directory to the target_folder_directory
+cmd = paste0("cp nidap-export/run_pipeline.py ", exported_NIDAP_codebook)
+system(cmd)
 
+# Set current working directory to the target_folder_directory
 if (download_data) {
   setwd(target_folder_directory)
   Sys.setenv(nidap_key = key)
   system(paste0(rscript_path, " get_data.R"))
 }
 
-cmd = paste0("cp nidap-export/run_pipeline.py ", exported_NIDAP_codebook)
-system(cmd)
