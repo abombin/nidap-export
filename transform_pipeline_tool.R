@@ -93,5 +93,5 @@ if (download_data) {
   system(paste0(rscript_path, " get_data.R"))
 }
 
-cmd = paste0("cp run_pipeline.py ", exported_NIDAP_codebook)
+cmd = paste0("cp nidap-export/run_pipeline.py ", exported_NIDAP_codebook)
 system(cmd)
