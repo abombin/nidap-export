@@ -93,7 +93,5 @@ if (download_data) {
   system(paste0(rscript_path, " get_data.R"))
 }
 
-
-# last step that I need to do is to replace "key" with "nidap_key" in transform.R script
-
-
+cmd = paste0("cp run_pipeline.py ", exported_NIDAP_codebook)
+system(cmd)
