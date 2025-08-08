@@ -246,6 +246,23 @@ transform_pipeline <- function(pipe_R,
   print(funname)
   functions[[funname]]$codebody <- formated_list
   function_file_names <- c("")
+  
+  # AB code to adress GSEA GSVA templates
+  all_workflow_function_names = names(functions)
+  gsea_template_name = all_workflow_function_names[grepl("GSEA" ,all_workflow_function_names, ignore.case = T) & 
+                                           grepl("Preranked" , all_workflow_function_names, ignore.case = T)]
+  gsva_template_name = all_workflow_function_names[grepl("GSVA" ,all_workflow_function_names, ignore.case = T) & 
+                                                    grepl("Results" , all_workflow_function_names, ignore.case = T)]
+  
+  gsea_templates_to_correct = c(gsea_template_name, gsva_template_name)
+  for (current_template_name in gsea_templates_to_correct) {
+    current_template = functions[[current_template_name]]$codebody
+    current_template = gsub('pathways_database', 'pathways_df_database', current_template, fixed = T)
+    current_template = gsub('pathways_df_database[["species"]] == collection_species', 'species == collection_species', current_template, fixed = T)
+    current_template = gsub('pathways_df_database[["collection"]], collections_to_include)', 'collection, collections_to_include)', current_template, fixed = T)
+    current_template = gsub('SparkR', 'dplyr', current_template, fixed = T)
+    functions[[current_template_name]]$codebody = current_template
+  }
 
 # Parsing templates
   print("Parsing Templates ======================================================")
@@ -415,6 +432,28 @@ transform_pipeline <- function(pipe_R,
             "#############################",
             ""
           )
+          function_script_body <- c(
+            function_script_body, 
+            paste0(
+              "if (class(", inrds,") == 'data.frame') { colnames(", inrds,") <- gsub('.', '_', colnames(",inrds, "), fixed = TRUE)}"
+            )
+          )
+          function_script_body <- c(
+            function_script_body,
+            "#############################",
+            ""
+          )
+          function_script_body <- c(
+            function_script_body, 
+            paste0(
+              "if (class(", inrds,") == 'data.frame') { colnames(", inrds,") <- gsub('ï»¿', '', colnames(",inrds, "), fixed = TRUE)}"
+            )
+          )
+          function_script_body <- c(
+            function_script_body,
+            "#############################",
+            ""
+          )
         }
         
         function_script_body <- c(
@@ -484,7 +523,7 @@ transform_pipeline <- function(pipe_R,
   get_data_script <- file(paste0(pipeline_dir, "/get_data.R"), "w")
   writeLines(paste0('source(\"', package_prfix, 
       "download_tools.R\")"), con = get_data_script)
-  writeLines("key<-Sys.getenv(\"key\")", 
+  writeLines("key<-Sys.getenv(\"nidap_key\")", 
        con = get_data_script)
 
   # Write rds output into a folder
@@ -532,7 +571,7 @@ transform_pipeline <- function(pipe_R,
   #writeLines(paste0('setwd("',pipeline_dir,'")'),con=verify_data_script)
   writeLines(paste0("source(\"", package_prfix, 
       "download_tools.R\")"), con = verify_data_script)
-  writeLines("key<-Sys.getenv(\"key\")", con = verify_data_script)
+  writeLines("key<-Sys.getenv(\"nidap_key\")", con = verify_data_script)
   writeLines("report<-list()", con = verify_data_script)
   writeLines("currentdir <- getwd()", con = verify_data_script)
   writeLines("rds_output <- paste0(currentdir,\"/rds_output\")", 
