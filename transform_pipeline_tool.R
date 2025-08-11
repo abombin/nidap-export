@@ -4,7 +4,7 @@ option_list <- list(
   make_option(c("-i", "--input"), type = "character",
               help = "Path to the exported_NIDAP_codebook (required)"),
   make_option(c("-w", "--target_w_dir"), type = "character",
-              help = "The path to the target working directory, which should be the your main (optional). If omitted, use current working directory."),
+              help = "The path to the target working directory, which should be your main directory (optional). If omitted, use current working directory."),
   make_option(c("-o", "--output_dir_name"), type = "character",
               help = "The name of folder to stored the parsed pipeline, which will be under the target working directory (optional). If omitted, it's generated from the input name."),
   make_option(c("-b", "--branch"), type = "character", default = "master",
