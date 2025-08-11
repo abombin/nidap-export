@@ -60,6 +60,11 @@ figure_out_nidap_files <- function(transfers){
                     header = TRUE, 
                     check.names = FALSE))
     
+  }else if (length(input_file) == 1 && grepl("\\.(txt|tsv)$", input_file)){
+    return(read.table(input_file, stringsAsFactors = FALSE, 
+                      header = TRUE, 
+                      check.names = FALSE, sep = "\t"))
+  
   }else if(sum(grepl("abc$", input_file))){
     return(read.csv(input_file, 
                     stringsAsFactors = FALSE, 
