@@ -61,7 +61,7 @@ figure_out_nidap_files <- function(transfers){
                     check.names = FALSE))
     
   }else if (length(input_file) == 1 && grepl("\\.(txt|tsv)$", input_file)){
-    return(read.table(input_file, stringsAsFactors = FALSE, 
+    return(read.delim(input_file, stringsAsFactors = FALSE, 
                       header = TRUE, 
                       check.names = FALSE, sep = "\t"))
   
