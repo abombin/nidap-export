@@ -88,6 +88,21 @@ transform_pipeline(exported_R_script_from_NIDAP,
 cmd = paste0("cp nidap-export/run_pipeline.py ", foldername_to_store_pipeline, "/")
 system(cmd)
 
+# identify GSVA templates
+gsva_templates = list.files(foldername_to_store_pipeline, pattern = "GSVA", full.names = T)
+gsva_templates = gsva_templates[!grepl("PostIt", gsva_templates, ignore.case = T)]
+
+# make edits 
+for (cur_teplate in gsva_templates) {
+  content <- readLines(cur_teplate, warn = FALSE)
+  content <- paste(content, collapse = "\n")
+  content <- gsub("geneset_table <- geneset_table %>% dplyr::filter(filter_string)", 
+                  "geneset_table <- geneset_table[grepl(constraints, geneset_table[, filter_column], ignore.case = T),]", 
+                  content, fixed = T)
+  
+  writeLines(content, cur_teplate)
+}
+
 # Set current working directory to the target_folder_directory
 if (download_data) {
   setwd(target_folder_directory)
