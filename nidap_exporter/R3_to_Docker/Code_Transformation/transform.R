@@ -483,37 +483,145 @@ transform_pipeline <- function(pipe_R,
     
     # Error handle: Error topologically sorting graph
     if(numfuncs == numfuncsstart){
-      print("Error topologically sorting graph, stopping")
-      print("Unsatisfiable functions dependencies, check parse errors:")
+      print("=============================================================================")
+      print("ERROR: Topological sorting failed - Unsatisfiable function dependencies")
+      print("=============================================================================")
+      print(paste("Total functions:", length(functions)))
+      print(paste("Remaining unprocessed functions:", numfuncs))
+      print(paste("Available calculated variables:", paste(calcvars, collapse = ", ")))
+      print("")
+      
+      # Enhanced error reporting with detailed dependency analysis
+      unresolved_functions <- c()
+      missing_dependencies <- list()
+      circular_deps <- list()
+      
+      print("DETAILED ANALYSIS OF UNRESOLVED FUNCTIONS:")
+      print("==========================================")
       
       for(k in 1 : length(functions)){
         if(uncalcfun[k] == FALSE){
           func <- functions[[k]]
-          print(func$sig)
-          print(func$vars)
-          function_line <- k
-          fun <- func
-          ino = str_match(fun$sig, "(?<=\\().*?(?=\\))")
-          print(ino)
+          function_name <- func$n
+          unresolved_functions <- c(unresolved_functions, function_name)
           
-          if(nchar(ino)>0){
+          print(paste(">>> FUNCTION", k, ":", function_name, "<<<"))
+          print(paste("   File name:", func$filename))
+          print(paste("   Function signature:", func$sig))
+          print(paste("   Expected output variable:", func$out))
+          print(paste("   Required input variables:", paste(func$vars, collapse = ", ")))
+          
+          # Check which specific variables are missing
+          missing_vars <- func$vars[!(func$vars %in% calcvars)]
+          available_vars <- func$vars[func$vars %in% calcvars]
+          
+          if(length(missing_vars) > 0){
+            print(paste("   ❌ MISSING DEPENDENCIES:", paste(missing_vars, collapse = ", ")))
+            missing_dependencies[[function_name]] <- missing_vars
+          }
+          
+          if(length(available_vars) > 0){
+            print(paste("   ✅ Available dependencies:", paste(available_vars, collapse = ", ")))
+          }
+          
+          # Check for potential circular dependencies
+          if(func$out %in% func$vars){
+            print("   ⚠️  CIRCULAR DEPENDENCY: Function depends on its own output!")
+            circular_deps[[function_name]] <- func$out
+          }
+          
+          # Detailed parameter analysis
+          ino = str_match(func$sig, "(?<=\\().*?(?=\\))")
+          if(!is.na(ino) && nchar(ino) > 0){
             ino1 <- trimws(str_split(ino, ",")[[1]])
-            print("split")
-            print(ino1)
-            print("meta names")
-            print(names(fun$ins))
-            revins <- names(fun$ins)
-            names(revins) <- unname(fun$ins)
-            orevins <- revins[paste0("var_",ino1)]
-            varl <- ifelse(unname(orevins) %in% names(outhash), 
-                           outhash[orevins], newhash[orevins])
-            print("varl")
-            print(varl)
-            ins = paste0(unname(varl), collapse = ',')
+            print(paste("   Function parameters:", paste(ino1, collapse = ", ")))
+            print(paste("   Input mappings:", paste(names(func$ins), "->", unname(func$ins), collapse = "; ")))
+            
+            # Check each parameter mapping
+            revins <- names(func$ins)
+            names(revins) <- unname(func$ins)
+            orevins <- revins[paste0("var_", ino1)]
+            
+            for(param_idx in 1:length(ino1)){
+              param_name <- ino1[param_idx]
+              var_name <- paste0("var_", param_name)
+              mapped_var <- orevins[var_name]
+              
+              if(is.na(mapped_var)){
+                print(paste("   ❌ UNMAPPED PARAMETER:", param_name, "-> no mapping found"))
+              } else {
+                final_var <- ifelse(unname(mapped_var) %in% names(outhash), 
+                                    outhash[mapped_var], newhash[mapped_var])
+                if(is.na(final_var) || is.null(final_var)){
+                  print(paste("   ❌ UNRESOLVED PARAMETER:", param_name, "->", mapped_var, "-> NULL"))
+                } else {
+                  print(paste("   📋 Parameter mapping:", param_name, "->", mapped_var, "->", final_var))
+                }
+              }
             }
           }
+          print("")
         }
-      stop()
+      }
+      
+      print("DEPENDENCY SUMMARY:")
+      print("==================")
+      print(paste("Functions with unresolved dependencies:", length(unresolved_functions)))
+      
+      if(length(missing_dependencies) > 0){
+        print("\nMISSING DEPENDENCIES BY FUNCTION:")
+        for(fname in names(missing_dependencies)){
+          print(paste("  ", fname, "needs:", paste(missing_dependencies[[fname]], collapse = ", ")))
+        }
+      }
+      
+      if(length(circular_deps) > 0){
+        print("\nCIRCULAR DEPENDENCIES DETECTED:")
+        for(fname in names(circular_deps)){
+          print(paste("  ", fname, "depends on its own output:", circular_deps[[fname]]))
+        }
+      }
+      
+      # Check for potential producers of missing variables
+      print("\nPOTENTIAL SOLUTIONS:")
+      print("===================")
+      all_missing <- unique(unlist(missing_dependencies))
+      for(missing_var in all_missing){
+        producers <- c()
+        for(j in 1:length(functions)){
+          if(functions[[j]]$out == missing_var){
+            producers <- c(producers, functions[[j]]$n)
+          }
+        }
+        if(length(producers) > 0){
+          print(paste("Variable", missing_var, "should be produced by:", paste(producers, collapse = ", ")))
+        } else {
+          print(paste("Variable", missing_var, "has NO PRODUCER - check newhash or outhash mapping"))
+        }
+      }
+      
+      print("\nHASH TABLES STATE:")
+      print("==================")
+      print("newhash (input variables):")
+      if(length(newhash) > 0){
+        for(i in 1:length(newhash)){
+          print(paste("  ", names(newhash)[i], "->", newhash[[i]]))
+        }
+      } else {
+        print("  (empty)")
+      }
+      
+      print("outhash (output variables):")
+      if(length(outhash) > 0){
+        for(i in 1:length(outhash)){
+          print(paste("  ", names(outhash)[i], "->", outhash[[i]]))
+        }
+      } else {
+        print("  (empty)")
+      }
+      
+      print("=============================================================================")
+      stop("Topological sorting failed due to unresolvable dependencies. See detailed analysis above.")
     }
   }
 
