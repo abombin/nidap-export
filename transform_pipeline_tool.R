@@ -1,5 +1,54 @@
 library(optparse)
 
+transform_download_script <- function(input_file, branch_name, output_file) {
+  # Read all lines from input file
+  lines <- readLines(input_file)
+  output_lines <- c()
+  i <- 1
+  while (i <= length(lines)) {
+    line <- trimws(lines[i])
+    # Check if current line is branch="master"
+    if (grepl('branch\\s*=\\s*["\']master["\']', line)) {
+      # Found branch="master", collect the next 2 lines
+      branch_line <- lines[i]
+      pullnidap_line <- if (i + 1 <= length(lines)) lines[i + 1] else ""
+      figure_out_line <- if (i + 2 <= length(lines)) lines[i + 2] else ""
+      save_line <- if (i + 3 <= length(lines)) lines[i + 3] else ""
+      # Create modified version with CD8_Tcells
+      #modified_branch <- gsub('["\']master["\']', '"CD8_Tcells"', branch_line)
+      #modified_branch <- gsub('master', branch_name, branch_line)
+      modified_branch <- gsub('["\']master["\']', paste0('"', branch_name, '"'), branch_line)
+      # Create the try/catch block
+      print("generate output lines")
+      output_lines <- c(output_lines,
+                        paste0("# Try ", branch_name, " first, fallback to master"),
+                        "tryCatch({",
+                        paste0("  ", modified_branch),
+                        paste0("  ", pullnidap_line),
+                        paste0("  ", figure_out_line),
+                        paste0("  ", save_line),
+                        "}, error = function(e) {",
+                        paste0("  cat('", branch_name, " failed, trying master...\\n')"),
+                        paste0("  ", branch_line),
+                        paste0("  ", pullnidap_line),
+                        paste0("  ", figure_out_line),
+                        paste0("  ", save_line),
+                        "})")
+      
+      # Skip the next 2 lines since we already processed them
+      i <- i + 4
+    } else {
+      # Regular line, just copy it
+      output_lines <- c(output_lines, lines[i])
+      i <- i + 1
+    }
+  }
+  
+  # Write the transformed script
+  writeLines(output_lines, output_file)
+  cat("Transformed script written to:", output_file, "\n")
+}
+
 option_list <- list(
   make_option(c("-i", "--input"), type = "character",
               help = "Path to the exported_NIDAP_codebook (required)"),
@@ -103,10 +152,29 @@ for (cur_teplate in gsva_templates) {
   writeLines(content, cur_teplate)
 }
 
+# edit template_AutoThresh.R
+
+if (file.exists(paste0(foldername_to_store_pipeline,"/template_AutoThresh.R"))) {
+  content <- readLines(paste0(foldername_to_store_pipeline,"/template_AutoThresh.R"), warn = FALSE)
+  content <- paste(content, collapse = "\n")
+  content <- gsub("return(so[[1]])", 
+                  "#return(so[[1]])", 
+                  content, fixed = T)
+  writeLines(content, paste0(foldername_to_store_pipeline,"/template_AutoThresh.R"))
+}
+
 # Set current working directory to the target_folder_directory
 if (download_data) {
   setwd(target_folder_directory)
   Sys.setenv(nidap_key = key)
-  system(paste0(rscript_path, " get_data.R"))
+  if (branch_of_dataset == "master") {
+    system(paste0(rscript_path, " get_data.R"))
+  } else {
+    transform_download_script(input_file = "get_data.R",
+                              output_file = "get_data_branch.R", 
+                              branch_name = branch_of_dataset)
+    
+    system(paste0(rscript_path, " get_data_branch.R"))
+  }
 }
 
